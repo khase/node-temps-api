@@ -11,11 +11,11 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 var mysql = require('mysql');
 var con = mysql.createConnection({
-  host: "mysql",
-  user: "root",
-  password: "aids"
+  host: process.env.MYSQL_HOST || "mysql",
+  user: process.env.MYSQL_USER || "root",
+  password: process.env.MYSQL_PASSWORD || process.env.MYSQL_ROOT_PASSWORD || ""
 });
-const dbName = "esp";
+const dbName = process.env.MYSQL_DATABASE || "esp";
 const tableNameTimestamps = "timestamps";
 const tableSQLTimestamps = "CREATE TABLE IF NOT EXISTS `" + dbName + "`.`" + tableNameTimestamps + "` ( `timestamp` INT NOT NULL, `dateTime` DATETIME NULL, `year` INT NULL, `month` INT NULL, `day` INT NULL, `dayOfWeek` INT NULL, `week` INT NULL, `hour` INT NULL, `minute` INT NULL, `second` INT NULL, PRIMARY KEY (`timestamp`)) ENGINE = InnoDB;"
 const tableNameTypes = "types";
