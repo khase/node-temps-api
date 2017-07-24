@@ -17,32 +17,15 @@ var con = mysql.createConnection({
 });
 const dbName = process.env.MYSQL_DATABASE || "esp";
 const tableNameTimestamps = "timestamps";
-const tableSQLTimestamps = "CREATE TABLE IF NOT EXISTS `" + dbName + "`.`" + tableNameTimestamps + "` ( `timestamp` INT NOT NULL, `dateTime` DATETIME NULL, `year` INT NULL, `month` INT NULL, `day` INT NULL, `dayOfWeek` INT NULL, `week` INT NULL, `hour` INT NULL, `minute` INT NULL, `second` INT NULL, PRIMARY KEY (`timestamp`)) ENGINE = InnoDB;"
+const tableSQLTimestamps = "CREATE TABLE IF NOT EXISTS `" + dbName + "`.`" + tableNameTimestamps + "` ( `timestamp` INT NOT NULL, `dateTime` DATETIME NULL, `year` INT NULL, `month` INT NULL, `day` INT NULL, `dayOfWeek` INT NULL, `week` INT NULL, `hour` INT NULL, `minute` INT NULL, `second` INT NULL, PRIMARY KEY (`timestamp`)) ENGINE = InnoDB;";
 const tableNameTypes = "types";
-const tableSQLTypes = "CREATE TABLE IF NOT EXISTS `" + dbName + "`.`" + tableNameTypes + "` ( `id` INT NOT NULL, `name` VARCHAR(45) NULL, `unit` VARCHAR(45) NULL, PRIMARY KEY (`id`)) ENGINE = InnoDB;"
+const tableSQLTypes = "CREATE TABLE IF NOT EXISTS `" + dbName + "`.`" + tableNameTypes + "` ( `id` INT NOT NULL, `name` VARCHAR(45) NULL, `unit` VARCHAR(45) NULL, PRIMARY KEY (`id`)) ENGINE = InnoDB;";
 const tableFixturesTypes = "INSERT INTO `" + dbName + "`.`" + tableNameTypes + "` (`id`, `name`, `unit`) VALUES ('0', 'Lufttemperatur', '°C'),('1', 'Luftfeuchtigkeit', '%'),('2', 'Wassertemperatur', '°C');";
 const tableNameData = "data";
-const tableSQLData = "CREATE TABLE IF NOT EXISTS `" + dbName + "`.`" + tableNameData + "` ( `id` INT NOT NULL AUTO_INCREMENT, `timestamp` INT NULL, `type` INT NULL, `value` FLOAT NULL, PRIMARY KEY (`id`), INDEX `fk_data_timestamps_idx` (`timestamp` ASC), INDEX `fk_data_types1_idx` (`type` ASC), CONSTRAINT `fk_data_timestamps`   FOREIGN KEY (`timestamp`)   REFERENCES `" + dbName + "`.`" + tableNameTimestamps + "` (`timestamp`)   ON DELETE NO ACTION   ON UPDATE NO ACTION, CONSTRAINT `fk_data_types1`   FOREIGN KEY (`type`)   REFERENCES `" + dbName + "`.`" + tableNameTypes + "` (`id`)   ON DELETE NO ACTION   ON UPDATE NO ACTION) ENGINE = InnoDB;"
+const tableSQLData = "CREATE TABLE IF NOT EXISTS `" + dbName + "`.`" + tableNameData + "` ( `id` INT NOT NULL AUTO_INCREMENT, `timestamp` INT NULL, `type` INT NULL, `value` FLOAT NULL, PRIMARY KEY (`id`), INDEX `fk_data_timestamps_idx` (`timestamp` ASC), INDEX `fk_data_types1_idx` (`type` ASC), CONSTRAINT `fk_data_timestamps`   FOREIGN KEY (`timestamp`)   REFERENCES `" + dbName + "`.`" + tableNameTimestamps + "` (`timestamp`)   ON DELETE NO ACTION   ON UPDATE NO ACTION, CONSTRAINT `fk_data_types1`   FOREIGN KEY (`type`)   REFERENCES `" + dbName + "`.`" + tableNameTypes + "` (`id`)   ON DELETE NO ACTION   ON UPDATE NO ACTION) ENGINE = InnoDB;";
 
-
-const joinSQPpart = "join `" + dbName + "`.`" + tableNameTypes + "` on `" + 
-                      dbName + "`.`" + tableNameData + "`.type = `" + dbName + "`.`" + tableNameTypes + "`.id " + 
-                    "join `" + dbName + "`.`" + tableNameTimestamps + "` on `" + 
-                      dbName + "`.`" + tableNameData + "`.timestamp = `" + dbName + "`.`" + tableNameTimestamps + "`.timestamp";
-const groupSQLpartOLD = "group by `" + 
-                      dbName + "`.`" + tableNameData + "`.type, `" + 
-                      dbName + "`.`" + tableNameTimestamps + "`.year, `" + 
-                      dbName + "`.`" + tableNameTimestamps + "`.month, `" + 
-                      dbName + "`.`" + tableNameTimestamps + "`.day, `" + 
-                      dbName + "`.`" + tableNameTimestamps + "`.hour, `" + 
-                      dbName + "`.`" + tableNameTimestamps + "`.minute div 5";
-const groupSQLpart = "group by `" + 
-                      dbName + "`.`" + tableNameData + "`.type, `" + 
-                      dbName + "`.`" + tableNameTimestamps + "`.timestamp div 300";
-const orderSQLpart = "order by `" + dbName + "`.`" + tableNameData + "`.timestamp desc";
-
-const joinedSQL = "SELECT dateTime, name, avg(value) as value, unit FROM `" + dbName + "`.`" + tableNameData + "` " + joinSQPpart + " " + groupSQLpart + " " + orderSQLpart;
-const maxAgeSQL = "Select dateTime, name, value from (SELECT `" + dbName + "`.`" + tableNameData + "`.timestamp, dateTime, name, avg(value) as value, unit FROM `" + dbName + "`.`" + tableNameData + "` " + joinSQPpart + " " + groupSQLpart + " " + orderSQLpart + ") as tmp where tmp.timestamp < unix_timestamp() - 59 and tmp.timestamp > unix_timestamp() - "
+const generalSQL = "SELECT DATE_FORMAT(FROM_UNIXTIME(`" + tableNameData + "`.timestamp), \"%Y.%m.%d %H:00\"), `" + tableNameTypes + "`.name, `" + tableNameData + "`.value, `" + tableNameTypes + "`.unit FROM (SELECT MIN(timestamp) as timestamp, type, ROUND(AVG(value), 2) as value FROM `" + dbName + "`.`" + tableNameData + "` WHERE `" + dbName + "`.`" + tableNameData + "`.timestamp < UNIX_TIMESTAMP() AND `" + dbName + "`.`" + tableNameData + "`.timestamp > 1500000000 GROUP BY `" + dbName + "`.`" + tableNameData + "`.timestamp div 3600, `" + dbName + "`.`" + tableNameData + "`.type) AS `" + tableNameData + "` JOIN `" + dbName + "`.`" + tableNameTypes + "` ON `" + dbName + "`.`" + tableNameTypes + "`.id = `" + tableNameData + "`.type ORDER BY `" + tableNameData + "`.timestamp desc ";
+const todaySQL = "SELECT DATE_FORMAT(FROM_UNIXTIME(`" + tableNameData + "`.timestamp), \"%Y.%m.%d %H:%i\"), `" + tableNameTypes + "`.name, `" + tableNameData + "`.value, `" + tableNameTypes + "`.unit FROM (SELECT MIN(timestamp) as timestamp, type, ROUND(AVG(value), 2) as value FROM `" + dbName + "`.`" + tableNameData + "` WHERE `" + dbName + "`.`" + tableNameData + "`.timestamp < UNIX_TIMESTAMP() AND `" + dbName + "`.`" + tableNameData + "`.timestamp > UNIX_TIMESTAMP() - time_to_sec(NOW()) GROUP BY `" + dbName + "`.`" + tableNameData + "`.timestamp div 900, `" + dbName + "`.`" + tableNameData + "`.type) AS `" + tableNameData + "` JOIN `" + dbName + "`.`" + tableNameTypes + "` ON `" + dbName + "`.`" + tableNameTypes + "`.id = `" + tableNameData + "`.type ORDER BY `" + tableNameData + "`.timestamp desc";
 
 app.post('/', function(req, res) {
   res.send("{success: true}");
@@ -100,22 +83,18 @@ app.get('/types', function(req, res) {
   });
 });
 
-app.get('/data/joined/:maxage', function(req, res) {
-  if (!req.params.maxage) {
-    res.send("{success: false}");
-  }
-
-  con.query(maxAgeSQL + req.params.maxage, function (err, result, fields) {
-    if (err) throw err;
-    res.send(result);
-  }); 
+app.get('/data/today', function(req, res) {
+    con.query(todaySQL, function (err, result, fields) {
+        if (err) throw err;
+        res.send(result);
+    });
 });
 
-app.get('/data/joined', function(req, res) {
-  con.query(joinedSQL, function (err, result, fields) {
-    if (err) throw err;
-    res.send(result);
-  });
+app.get('/data/all', function(req, res) {
+    con.query(generalSQL, function (err, result, fields) {
+        if (err) throw err;
+        res.send(result);
+    });
 });
 
 app.get('/data', function(req, res) {
