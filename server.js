@@ -121,7 +121,7 @@ app.get('/ota', function(req, res) {
     }
 
     res.status(200);
-    res.sendFile(firmware);
+    res.sendFile(__dirname + firmware);
 });
 
 var server = app.listen(80, function () {
