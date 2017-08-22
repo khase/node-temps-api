@@ -170,7 +170,7 @@ var server = app.listen(80, function () {
 
 function findFirmware(oldVersion){
     var startPath = "firmwares";
-    var filter = "*.bin";
+    var filter = ".bin";
 
     if (!fs.existsSync(startPath)){
         console.log("no dir ",startPath);
