@@ -20,7 +20,7 @@ const tableNameTimestamps = "timestamps";
 const tableSQLTimestamps = "CREATE TABLE IF NOT EXISTS `" + dbName + "`.`" + tableNameTimestamps + "` ( `timestamp` INT NOT NULL, `dateTime` DATETIME NULL, `year` INT NULL, `month` INT NULL, `day` INT NULL, `dayOfWeek` INT NULL, `week` INT NULL, `hour` INT NULL, `minute` INT NULL, `second` INT NULL, PRIMARY KEY (`timestamp`)) ENGINE = InnoDB;";
 const tableNameTypes = "types";
 const tableSQLTypes = "CREATE TABLE IF NOT EXISTS `" + dbName + "`.`" + tableNameTypes + "` ( `id` INT NOT NULL, `name` VARCHAR(45) NULL, `unit` VARCHAR(45) NULL, PRIMARY KEY (`id`)) ENGINE = InnoDB;";
-const tableFixturesTypes = "INSERT INTO `" + dbName + "`.`" + tableNameTypes + "` (`id`, `name`, `unit`) VALUES ('0', 'Lufttemperatur', '°C'),('1', 'Luftfeuchtigkeit', '%'),('2', 'Wassertemperatur', '°C');";
+const tableFixturesTypes = "INSERT INTO `" + dbName + "`.`" + tableNameTypes + "` (`id`, `name`, `unit`) VALUES ('0', 'Lufttemperatur', '°C'),('1', 'Luftfeuchtigkeit', '%'),('2', 'Wassertemperatur', '°C'),('3', 'Batterie', 'Volt');";
 const tableNameData = "data";
 const tableSQLData = "CREATE TABLE IF NOT EXISTS `" + dbName + "`.`" + tableNameData + "` ( `id` INT NOT NULL AUTO_INCREMENT, `timestamp` INT NULL, `type` INT NULL, `value` FLOAT NULL, PRIMARY KEY (`id`), INDEX `fk_data_timestamps_idx` (`timestamp` ASC), INDEX `fk_data_types1_idx` (`type` ASC), CONSTRAINT `fk_data_timestamps`   FOREIGN KEY (`timestamp`)   REFERENCES `" + dbName + "`.`" + tableNameTimestamps + "` (`timestamp`)   ON DELETE NO ACTION   ON UPDATE NO ACTION, CONSTRAINT `fk_data_types1`   FOREIGN KEY (`type`)   REFERENCES `" + dbName + "`.`" + tableNameTypes + "` (`id`)   ON DELETE NO ACTION   ON UPDATE NO ACTION) ENGINE = InnoDB;";
 
@@ -61,9 +61,10 @@ app.post('/', function(req, res) {
   var dataSQL = "INSERT INTO `" + dbName + "`.`" + tableNameData + "` " + 
             "(`timestamp`, `type`, `value`) " + 
             "VALUES " + 
-            "('" + req.body.t + "', '0', '" + req.body.a + "'), " + 
-            "('" + req.body.t + "', '1', '" + req.body.h + "'), " + 
-            "('" + req.body.t + "', '2', '" + req.body.w + "')";
+            "('" + req.body.t + "', '0', '" + req.body.a + "'), " +
+            "('" + req.body.t + "', '1', '" + req.body.h + "'), " +
+            "('" + req.body.t + "', '2', '" + req.body.w + "'), " +
+            "('" + req.body.t + "', '3', '" + req.body.b + "')";
   con.query(dataSQL, function (err, result) {});
 });
 
