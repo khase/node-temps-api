@@ -111,7 +111,7 @@ app.get('/data', function(req, res) {
 });
 
 app.get('/ota', function(req, res) {
-    var firmware = findFirmware(req.headers.x-esp8266-version);
+    var firmware = findFirmware(req.headers['x-esp8266-version']);
 
     if (!firmware) {
         res.status(304);
