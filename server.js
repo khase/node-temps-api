@@ -107,6 +107,12 @@ app.get('/data', function(req, res) {
   });
 });
 
+app.get('/ota', function(req, res) {
+    console.log(util.inspect(req.headers, false, null));
+    res.status(304);
+    res.send('No update required');
+});
+
 var server = app.listen(80, function () {
   var host = server.address().address;
   var port = server.address().port;
