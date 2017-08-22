@@ -116,6 +116,7 @@ app.get('/ota', function(req, res) {
     if (!firmware) {
         res.status(304);
         res.send('No update found');
+        return;
     }
 
     console.log(firmware);
