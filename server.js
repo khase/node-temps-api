@@ -111,6 +111,7 @@ app.get('/data', function(req, res) {
 });
 
 app.get('/ota', function(req, res) {
+    console.log("Searching update for: " + req.headers['x-esp8266-version']);
     var firmware = findFirmware(req.headers['x-esp8266-version']);
 
     if (!firmware) {
@@ -119,13 +120,8 @@ app.get('/ota', function(req, res) {
         return;
     }
 
-    console.log(firmware);
-    //res.status(200);
-    //res.sendFile(firmware);
-
-    console.log(util.inspect(req.headers, false, null));
-    res.status(304);
-    res.send('No update required');
+    res.status(200);
+    res.sendFile(firmware);
 });
 
 var server = app.listen(80, function () {
