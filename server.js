@@ -181,12 +181,14 @@ function findFirmware(oldVersion){
     for(var i=0;i<files.length;i++){
         var filename=path.join(startPath,files[i]);
         var stat = fs.lstatSync(filename);
-        console.log(filename);
         if (stat.isDirectory()){
             fromDir(filename,filter); //recurse
         }
-        else if (filename.indexOf(filter)>=0 && filename.indexOf(oldVersion + "->") >= 0) {
-            return filename;
+        else if (filename.indexOf(filter)>=0) {
+            console.log(filename);
+            if (filename.indexOf(oldVersion + "->") >= 0) {
+                return filename;
+            }
         };
     };
 };
