@@ -114,6 +114,12 @@ app.get('/ota', function(req, res) {
     console.log("Searching update for: " + req.headers['x-esp8266-version']);
     var firmware = findFirmware(req.headers['x-esp8266-version']);
 
+    console.log("Update Request from " +
+        req.headers['x-esp8266-sta-mac'] + " (" +
+        req.headers['x-esp8266-sketch-size'] + " bytes used / " +
+        req.headers['x-esp8266-free-space'] + " bytes free) Version: " +
+        req.headers['x-esp8266-version'])
+
     if (!firmware) {
         res.status(304);
         res.send('No update found');
@@ -185,7 +191,6 @@ function findFirmware(oldVersion){
             fromDir(filename,filter); //recurse
         }
         else if (filename.indexOf(filter)>=0) {
-            console.log(filename);
             if (filename.indexOf(oldVersion + "->") >= 0) {
                 return filename;
             }
