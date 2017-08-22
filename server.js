@@ -1,6 +1,9 @@
 var express = require('express');
 var app = express();
 
+var path = require('path');
+var fs=require('fs');
+
 var util = require('util');
 
 var bodyParser = require('body-parser');
@@ -108,6 +111,17 @@ app.get('/data', function(req, res) {
 });
 
 app.get('/ota', function(req, res) {
+    var firmware = findFirmware(req.headers.x-esp8266-version);
+
+    if (!firmware) {
+        res.status(304);
+        res.send('No update found');
+    }
+
+    console.log(firmware);
+    //res.status(200);
+    //res.sendFile(firmware);
+
     console.log(util.inspect(req.headers, false, null));
     res.status(304);
     res.send('No update required');
@@ -156,6 +170,28 @@ var server = app.listen(80, function () {
    
   console.log("App listening at http://%s:%s", host, port);
 })
+
+function findFirmware(oldVersion){
+    var startPath = "firmwares";
+    var filter = "*.bin";
+
+    if (!fs.existsSync(startPath)){
+        console.log("no dir ",startPath);
+        return;
+    }
+
+    var files=fs.readdirSync(startPath);
+    for(var i=0;i<files.length;i++){
+        var filename=path.join(startPath,files[i]);
+        var stat = fs.lstatSync(filename);
+        if (stat.isDirectory()){
+            fromDir(filename,filter); //recurse
+        }
+        else if (filename.indexOf(filter)>=0 && filename.indexOf(oldVersion + "->") >= 0) {
+            return filename;
+        };
+    };
+};
 
 function pad (num) {
   var norm = Math.abs(Math.floor(num));
