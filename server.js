@@ -113,7 +113,8 @@ app.get('/data', function(req, res) {
 app.get('/ota', function(req, res) {
     var firmware = findFirmware(req.headers['x-esp8266-version']);
 
-    console.log("Update Request from " +
+    console.log("[" + new Date().toJSON().slice(0,19).replace('T', ' ') + "] " +
+        "Update Request from " +
         req.headers['x-esp8266-sta-mac'] + " (" +
         req.headers['x-esp8266-sketch-size'] + " bytes used / " +
         req.headers['x-esp8266-free-space'] + " bytes free) Version: " +
